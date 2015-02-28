@@ -6,15 +6,13 @@ var path = require('path');
 var has = require('has');
 var st = ecstatic(path.join(__dirname, 'public'));
 
-var pages = {
-    '/': 'index.html',
-    '/task/create': 'create_task.html'
-};
-
 module.exports = function (req, res) {
-    if (has(pages, req.url)) {
+    var p = req.url.split(/[#?]/)[0];
+    if (p === '/') {
         html('layout.html').pipe(hyperstream({
-            '#content': html(pages[req.url])
+            '[page=create]': html('create.html'),
+            '[page=view]': html('view.html'),
+            '[page=edit]': html('edit.html')
         })).pipe(res);
     }
     else st(req, res);
