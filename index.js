@@ -6,9 +6,16 @@ var path = require('path');
 var has = require('has');
 var st = ecstatic(path.join(__dirname, 'public'));
 
+var router = require('routes')();
+router.addRoute('/', function () {});
+router.addRoute('/tasks', function () {});
+router.addRoute('/projects', function () {});
+router.addRoute('/projects/:name', function () {});
+router.addRoute('/view', function () {});
+router.addRoute('/edit', function () {});
+
 module.exports = function (req, res) {
-    var p = req.url.split(/[#?]/)[0];
-    if (p === '/') {
+    if (router.match(req.url)) {
         html('layout.html').pipe(hyperstream({
             '[page=create]': html('create.html'),
             '[page=view]': html('view.html'),

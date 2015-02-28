@@ -8,12 +8,32 @@ body {
   max-width: 900px;
 }
 
-#header h1 a:link, #header h1 a:visited {
+#header a:link, #header a:visited {
   text-decoration: none;
 }
 
-#header h1 a:hover {
+#header a:hover {
   text-decoration: underline;
+}
+
+#header .pages {
+  margin-left: -5ex;
+}
+
+#header .pages a[href] {
+  display: inline-block;
+  width: 15ex;
+  padding: 5px;
+  text-align: center;
+}
+
+#header .pages a[href]:hover {
+  background-color: #f0d8ff;
+}
+
+#header .pages a[href].active {
+  background-color: #808080;
+  color: #ffffff;
 }
 
 #content {
