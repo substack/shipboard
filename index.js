@@ -1,6 +1,5 @@
 var path = require('path');
 var ecstatic = require('ecstatic');
-var hyperstream = require('hyperstream');
 var fs = require('fs');
 var path = require('path');
 var has = require('has');
@@ -16,11 +15,7 @@ router.addRoute('/edit', function () {});
 
 module.exports = function (req, res) {
     if (router.match(req.url)) {
-        html('layout.html').pipe(hyperstream({
-            '[page=create]': html('create.html'),
-            '[page=view]': html('view.html'),
-            '[page=edit]': html('edit.html')
-        })).pipe(res);
+        html('layout.html').pipe(res);
     }
     else st(req, res);
 };

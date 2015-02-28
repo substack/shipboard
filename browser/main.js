@@ -98,8 +98,10 @@ var go = singlePage(function (href) {
         return;
     }
     var m = router.match(u.pathname + (u.search || ''));
-    if (prev) {
+    if (pages[prev]) {
         pages[prev].style.display = 'none';
+    }
+    if (links[prev]) {
         classList(links[prev]).remove('active');
     }
     if (links[u.pathname]) {
