@@ -9,7 +9,7 @@ var router = require('routes')();
 router.addRoute('/', function () {});
 router.addRoute('/tasks', function () {});
 router.addRoute('/projects', function () {});
-router.addRoute('/projects/:name', function () {});
+router.addRoute('/project/:name', function () {});
 router.addRoute('/view', function () {});
 router.addRoute('/edit', function () {});
 

@@ -1,8 +1,7 @@
 var h = require('virtual-hyperscript');
 var create = require('virtual-dom/create-element');
-var diff = require('virtual-dom/diff');
-var patch = require('virtual-dom/patch');
 
+var EventEmitter = require('events').EventEmitter;
 var url = require('url');
 var gantt = require('gantt-chart');
 var router = require('routes')();
@@ -25,31 +24,17 @@ router.addRoute('/project/:name', (function () {
         }
     });
     var page;
-    return function (p) {
+    return function (m) {
         if (!page) {
-            page = p;
+            page = m.page;
             page.appendChild(create(g.tree()));
         }
     };
 })());
 
-router.addRoute('/projects', (function () {
-    var tree;
-    return function (page) {
-        if (tree) return;
-        tree = h('div',
-            h('a', {
-                href: '/projects/cool',
-                onclick: clicker
-            }, 'cool')
-        );
-        page.appendChild(create(tree));
-    };
-    function clicker (ev) {
-        ev.preventDefault();
-        go(this.getAttribute('href'));
-    }
-})());
+router.addRoute('/projects',
+    require('../routes/project_list.js')
+);
 
 router.addRoute('/view', (function () {
     var g = gantt({
@@ -79,7 +64,7 @@ for (var i = 0; i < linkElems.length; i++) (function (link) {
     links[link.getAttribute('href')] = link;
     link.addEventListener('click', function (ev) {
         ev.preventDefault();
-        go(link.getAttribute('href'));
+        bus.emit('go', link.getAttribute('href'));
     });
 })(linkElems[i]);
 
@@ -90,6 +75,7 @@ for (var i = 0; i < pageElems.length; i++) {
 }
 
 var singlePage = require('single-page');
+var bus = new EventEmitter;
 var prev;
 var go = singlePage(function (href) {
     var u = url.parse(href);
@@ -107,10 +93,23 @@ var go = singlePage(function (href) {
     if (links[u.pathname]) {
         classList(links[u.pathname]).add('active');
     }
-    if (pages[u.pathname]) {
-        pages[u.pathname].style.display = 'block';
+    if (m && pages[m.route]) {
+        pages[m.route].style.display = 'block';
     }
-    if (m) m.fn(pages[u.pathname]);
-    prev = u.pathname;
+    if (m) {
+        m.fn({
+            params: m.params,
+            route: m.route,
+            page: pages[m.route],
+            bus: bus
+        });
+        prev = m.route;
+    }
+    else if (pages[u.pathname]) {
+        pages[u.pathname].style.display = 'block';
+        prev = u.pathname;
+    }
+    else prev = u.pathname;
 });
-go(location.href);
+bus.on('go', go);
+bus.emit('go', location.href);
