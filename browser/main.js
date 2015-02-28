@@ -1,11 +1,32 @@
-var h = require('virtual-hyperscript');
 var create = require('virtual-dom/create-element');
 
 var EventEmitter = require('events').EventEmitter;
 var url = require('url');
 var gantt = require('gantt-chart');
-var router = require('routes')();
 var classList = require('class-list');
+
+var level = require('level-browserify');
+var sublevel = require('subleveldown');
+var db = level('wiki.db');
+var wiki = require('wikidb')(sublevel(db, 'wiki'));
+
+var linkElems = document.querySelectorAll('a[href]');
+var links = {};
+for (var i = 0; i < linkElems.length; i++) (function (link) {
+    links[link.getAttribute('href')] = link;
+    link.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        bus.emit('go', link.getAttribute('href'));
+    });
+})(linkElems[i]);
+
+var pageElems = document.querySelectorAll('[page]');
+var pages = {};
+for (var i = 0; i < pageElems.length; i++) {
+    pages[pageElems[i].getAttribute('page')] = pageElems[i];
+}
+
+var router = require('routes')();
 
 router.addRoute('/', function () {
 });
@@ -32,9 +53,9 @@ router.addRoute('/project/:name', (function () {
     };
 })());
 
-router.addRoute('/projects',
-    require('../routes/project_list.js')
-);
+router.addRoute('/projects', require('../routes/project_list.js')(
+    pages['/projects'], bus, wiki
+));
 
 router.addRoute('/view', (function () {
     var g = gantt({
@@ -57,22 +78,6 @@ router.addRoute('/view', (function () {
 
 router.addRoute('/edit', function () {
 });
-
-var linkElems = document.querySelectorAll('a[href]');
-var links = {};
-for (var i = 0; i < linkElems.length; i++) (function (link) {
-    links[link.getAttribute('href')] = link;
-    link.addEventListener('click', function (ev) {
-        ev.preventDefault();
-        bus.emit('go', link.getAttribute('href'));
-    });
-})(linkElems[i]);
-
-var pageElems = document.querySelectorAll('[page]');
-var pages = {};
-for (var i = 0; i < pageElems.length; i++) {
-    pages[pageElems[i].getAttribute('page')] = pageElems[i];
-}
 
 var singlePage = require('single-page');
 var bus = new EventEmitter;
@@ -100,8 +105,7 @@ var go = singlePage(function (href) {
         m.fn({
             params: m.params,
             route: m.route,
-            page: pages[m.route],
-            bus: bus
+            page: pages[m.route]
         });
         prev = m.route;
     }
