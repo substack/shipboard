@@ -19,9 +19,34 @@
       </div>
       <div page="/tasks">
         <h2>tasks</h2>
+        <div class="right buttons">
+          <a href="/tasks/new">
+            <button>new task</button>
+          </a>
+        </div>
+      </div>
+      <div page="/tasks/new">
+        <h2>tasks</h2>
+        <form>
+          <h3>new task</h3>
+          
+          <div class="line">
+            <input type="text" name="name" placeholder="task name">
+          </div>
+          
+          <div class="line">
+            <textarea name="description" placeholder="task description"
+            ></textarea>
+          </div>
+          
+          <div class="line">
+            <button>create</button>
+          </div>
+        </form>
       </div>
       <div page="/projects">
-        <div>
+        <h2>projects</h2>
+        <div class="right buttons">
           <a href="/projects/new">
             <button>new project</button>
           </a>
