@@ -1,7 +1,3 @@
-var h = require('virtual-dom/h');
-var create = require('virtual-dom/create-element');
-var through = require('through2');
-
 module.exports = function (page, bus, wiki) {
     page.querySelector('form').addEventListener('submit', onsubmit);
     function onsubmit (ev) {
@@ -12,7 +8,7 @@ module.exports = function (page, bus, wiki) {
             tags: [ 'project' ]
         };
         var w = wiki.createWriteStream(opts, function () {
-            bus.emit('go', '/project/' + encodeURIComponent(w.key));
+            bus.emit('go', '/project/' + encodeURIComponent(opts.key));
         });
         w.end(this.elements.description.value);
     }

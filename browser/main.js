@@ -32,9 +32,6 @@ var router = require('routes')();
 router.addRoute('/', function () {
 });
 
-router.addRoute('/tasks', function () {
-});
-
 router.addRoute('/project/:name', (function () {
     var g = gantt({
         wow: {
@@ -54,12 +51,21 @@ router.addRoute('/project/:name', (function () {
     };
 })());
 
-router.addRoute('/projects', require('../routes/project_list.js')(
+router.addRoute('/projects', require('../routes/project/list.js')(
     pages['/projects'], bus, wiki
 ));
-
-router.addRoute('/projects/new', require('../routes/project_new.js')(
+router.addRoute('/projects/new', require('../routes/project/new.js')(
     pages['/projects/new'], bus, wiki
+));
+
+router.addRoute('/tasks', require('../routes/task/list.js')(
+    pages['/tasks'], bus, wiki
+));
+router.addRoute('/tasks/new', require('../routes/task/new.js')(
+    pages['/tasks/new'], bus, wiki
+));
+router.addRoute('/task/:name', require('../routes/task/show.js')(
+    pages['/task/:name'], bus, wiki
 ));
 
 router.addRoute('/view', (function () {

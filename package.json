@@ -6,6 +6,7 @@
   "dependencies": {
     "body": "^4.5.0",
     "class-list": "^0.1.1",
+    "concat-stream": "^1.4.7",
     "ecstatic": "^0.5.8",
     "routes": "^2.0.0",
     "single-page": "^1.0.0",
