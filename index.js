@@ -9,6 +9,7 @@ var router = require('routes')();
 router.addRoute('/', function () {});
 router.addRoute('/tasks', function () {});
 router.addRoute('/tasks/new', function () {});
+router.addRoute('/task/:name/edit', function () {});
 router.addRoute('/task/:name', function () {});
 router.addRoute('/projects', function () {});
 router.addRoute('/projects/new', function () {});

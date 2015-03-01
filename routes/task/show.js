@@ -9,8 +9,13 @@ var concat = require('concat-stream');
 module.exports = function (page, bus, wiki) {
     var name = page.querySelector('[key=name]');
     var desc = page.querySelector('[key=description]');
+    var link = page.querySelector('[key=link]');
     return function (m) {
         name.textContent = m.params.name;
+        link.setAttribute('href', '/task/'
+            + encodeURIComponent(m.params.name) + '/edit'
+        );
+        
         wiki.heads(m.params.name).pipe(through.obj(write));
         function write (row, enc, next) {
             wiki.createReadStream(row.hash).pipe(concat(function (body) {
