@@ -26,6 +26,7 @@ for (var i = 0; i < pageElems.length; i++) {
     pages[pageElems[i].getAttribute('page')] = pageElems[i];
 }
 
+var bus = new EventEmitter;
 var router = require('routes')();
 
 router.addRoute('/', function () {
@@ -57,6 +58,10 @@ router.addRoute('/projects', require('../routes/project_list.js')(
     pages['/projects'], bus, wiki
 ));
 
+router.addRoute('/projects/new', require('../routes/project_new.js')(
+    pages['/projects/new'], bus, wiki
+));
+
 router.addRoute('/view', (function () {
     var g = gantt({
         wow: {
@@ -80,7 +85,6 @@ router.addRoute('/edit', function () {
 });
 
 var singlePage = require('single-page');
-var bus = new EventEmitter;
 var prev;
 var go = singlePage(function (href) {
     var u = url.parse(href);

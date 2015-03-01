@@ -21,11 +21,29 @@
         <h2>tasks</h2>
       </div>
       <div page="/projects">
+        <div>
+          <a href="/projects/new">
+            <button>new project</button>
+          </a>
+        </div>
+      </div>
+      <div page="/projects/new">
         <h2>projects</h2>
         <form>
-          new project:
-          <input type="text">
-          <button>create</button>
+          <h3>new project</h3>
+          
+          <div class="line">
+            <input type="text" name="name" placeholder="project name">
+          </div>
+          
+          <div class="line">
+            <textarea name="description" placeholder="project description"
+            ></textarea>
+          </div>
+          
+          <div class="line">
+            <button>create</button>
+          </div>
         </form>
       </div>
       <div page="/project/:name">

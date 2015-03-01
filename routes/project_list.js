@@ -1,48 +1,49 @@
 var h = require('virtual-dom/h');
+var patch = require('virtual-dom/patch');
+var diff = require('virtual-dom/diff');
 var create = require('virtual-dom/create-element');
+
 var through = require('through2');
 
 module.exports = function (page, bus, wiki) {
     var tree, elem;
     var rows = {};
     
-    page.querySelector('form').addEventListener('submit', onsubmit);
-    function onsubmit (ev) {
-        ev.preventDefault();
-        console.log('create and append tagged doc here...');
-        
-        render();
-    }
-    
     return function (m) {
-        wiki.byTag('project').pipe(through(write));
+        listProjects();
+    };
+    
+    function listProjects () {
+        wiki.byTag('project').pipe(through.obj(write));
         
         function write (row, enc, next) {
             rows[row.key] = row;
             next();
             render();
         }
-        
-        function render () {
-            var ntree = h('div',
-                h('a', {
-                    href: '/project/cool',
+    }
+    
+    function render () {
+        var ntree = h('div',
+            Object.keys(rows).map(function (key) {
+                return h('a', {
+                    href: '/project/' + encodeURIComponent(key),
                     onclick: clicker
-                }, 'cool')
-            );
-            if (tree) {
-                elem = patch(elem, diff(tree, ntree));
-            }
-            else {
-                elem = create(ntree);
-                page.appendChild(elem);
-            }
-            tree = ntree;
+                }, key)
+            })
+        );
+        if (tree) {
+            elem = patch(elem, diff(tree, ntree));
         }
-        
-        function clicker (ev) {
-            ev.preventDefault();
-            m.bus.emit('go', this.getAttribute('href'));
+        else {
+            elem = create(ntree);
+            page.appendChild(elem);
         }
-    };
+        tree = ntree;
+    }
+    
+    function clicker (ev) {
+        ev.preventDefault();
+        bus.emit('go', this.getAttribute('href'));
+    }
 };
