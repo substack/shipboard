@@ -13,11 +13,9 @@ router.addRoute('/task/:name', function () {});
 
 module.exports = function (req, res) {
     if (router.match(req.url)) {
-        html('layout.html').pipe(res);
+        fs.createReadStream(path.join(__dirname, 'public/index.html'))
+            .pipe(res)
+        ;
     }
     else st(req, res);
 };
-
-function html (file) {
-    return fs.createReadStream(path.join(__dirname, 'html', file));
-}
