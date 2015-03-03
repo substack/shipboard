@@ -2,20 +2,14 @@ var path = require('path');
 var ecstatic = require('ecstatic');
 var fs = require('fs');
 var path = require('path');
-var has = require('has');
 var st = ecstatic(path.join(__dirname, 'public'));
 
 var router = require('routes')();
 router.addRoute('/', function () {});
 router.addRoute('/tasks', function () {});
 router.addRoute('/tasks/new', function () {});
-router.addRoute('/task/:name/edit', function () {});
+router.addRoute('/task/:hash/edit', function () {});
 router.addRoute('/task/:name', function () {});
-router.addRoute('/projects', function () {});
-router.addRoute('/projects/new', function () {});
-router.addRoute('/project/:name', function () {});
-router.addRoute('/view', function () {});
-router.addRoute('/edit', function () {});
 
 module.exports = function (req, res) {
     if (router.match(req.url)) {
