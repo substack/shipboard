@@ -1,132 +1,248 @@
 var create = require('virtual-dom/create-element');
+var patch = require('virtual-dom/patch');
+var diff = require('virtual-dom/diff');
+var h = require('virtual-dom/h');
+var vhtml = require('virtual-html');
+
+var through = require('through2');
+var marked = require('marked');
 
 var EventEmitter = require('events').EventEmitter;
 var url = require('url');
-var gantt = require('gantt-chart');
-var classList = require('class-list');
 
 var level = require('level-browserify');
 var sublevel = require('subleveldown');
 var db = level('wiki.db');
 var wiki = require('wikidb')(sublevel(db, 'wiki'));
 
-var linkElems = document.querySelectorAll('a[href]');
-var links = {};
-for (var i = 0; i < linkElems.length; i++) (function (link) {
-    links[link.getAttribute('href')] = link;
-    link.addEventListener('click', function (ev) {
-        ev.preventDefault();
-        bus.emit('go', link.getAttribute('href'));
-    });
-})(linkElems[i]);
-
-var pageElems = document.querySelectorAll('[page]');
-var pages = {};
-for (var i = 0; i < pageElems.length; i++) {
-    pages[pageElems[i].getAttribute('page')] = pageElems[i];
-}
-
 var bus = new EventEmitter;
-var router = require('routes')();
-
-router.addRoute('/', function () {
-});
-
-router.addRoute('/project/:name', (function () {
-    var g = gantt({
-        wow: {
-            duration: '1 week'
-        },
-        cool: {
-            duration: '3 days',
-            dependencies: [ 'wow' ]
-        }
-    });
-    var page;
-    return function (m) {
-        if (!page) {
-            page = m.page;
-            page.appendChild(create(g.tree()));
-        }
-    };
-})());
-
-router.addRoute('/projects', require('../routes/project/list.js')(
-    pages['/projects'], bus, wiki
-));
-router.addRoute('/projects/new', require('../routes/project/new.js')(
-    pages['/projects/new'], bus, wiki
-));
-
-router.addRoute('/tasks', require('../routes/task/list.js')(
-    pages['/tasks'], bus, wiki
-));
-router.addRoute('/tasks/new', require('../routes/task/new.js')(
-    pages['/tasks/new'], bus, wiki
-));
-router.addRoute('/task/:hash/edit', require('../routes/task/edit.js')(
-    pages['/task/:hash/edit'], bus, wiki
-));
-router.addRoute('/task/:name', require('../routes/task/show.js')(
-    pages['/task/:name'], bus, wiki
-));
-
-router.addRoute('/view', (function () {
-    var g = gantt({
-        wow: {
-            duration: '1 week'
-        },
-        cool: {
-            duration: '3 days',
-            dependencies: [ 'wow' ]
-        }
-    });
-    var page;
-    return function (p) {
-        if (!page) {
-            page = p;
-            page.appendChild(create(g.tree()));
-        }
-    };
-})());
-
-router.addRoute('/edit', function () {
+window.addEventListener('click', function (ev) {
+    if (ev.target.tagName !== 'a') return;
+    var u = url.parse(ev.target.getAttribute('href'));
+    if (u.host && u.host !== location.host) return;
+    ev.preventDefault();
+    bus.emit('go', ev.target.getAttribute('href'));
 });
 
 var singlePage = require('single-page');
-var prev;
 var go = singlePage(function (href) {
-    var u = url.parse(href);
-    if (u.host && u.host !== location.host) {
-        location.href = href;
-        return;
-    }
-    var m = router.match(u.pathname + (u.search || ''));
-    if (pages[prev]) {
-        pages[prev].style.display = 'none';
-    }
-    if (links[prev]) {
-        classList(links[prev]).remove('active');
-    }
-    if (links[u.pathname]) {
-        classList(links[u.pathname]).add('active');
-    }
-    if (m && pages[m.route]) {
-        pages[m.route].style.display = 'block';
-    }
-    if (m) {
-        m.fn({
-            params: m.params,
-            route: m.route,
-            page: pages[m.route]
+    var m = router.match(href);
+    if (!m) return console.error('404');
+    
+    var tree, prev, root;
+    var page = h('div');
+    
+    m.fn(m, function (p) {
+        page = p;
+        render();
+    });
+    
+    function render () {
+        var names = { '/': 'activity', '/tasks': 'tasks' };
+        var links = [ '/', '/tasks' ].map(function (href) {
+            return h('a', {
+                href: href,
+                className: m.route === href ? 'active' : ''
+            }, names[href])
         });
-        prev = m.route;
+        var tree = h('div', [
+            h('div#header', [
+                h('h1', [ h('a', { href: '/' }, 'shipboard') ]),
+                h('div.pages', links),
+            ]),
+            h('div#page', page)
+        ]);
+        if (prev) {
+            patch(root, diff(prev, tree));
+        }
+        else {
+            root = create(tree);
+            document.body.appendChild(root);
+        }
+        prev = tree;
     }
-    else if (pages[u.pathname]) {
-        pages[u.pathname].style.display = 'block';
-        prev = u.pathname;
-    }
-    else prev = u.pathname;
 });
 bus.on('go', go);
-bus.emit('go', location.href);
+
+var router = require('routes')();
+
+router.addRoute('/', function (m, show) {
+    show(h('div', 'activity goes here...'));
+});
+
+router.addRoute('/tasks', function (m, show) {
+    var rows = {};
+    render();
+    wiki.byTag('task').pipe(through.obj(write));
+    
+    function write (row, enc, next) {
+        rows[row.key] = row;
+        render();
+        next();
+    }
+    
+    function render () {
+        show(h('div', [
+            h('h2', 'tasks'),
+            h('div.right.buttons', [
+                h('a', { href: '/tasks/new' }, [
+                    h('button', 'new task')
+                ])
+            ]),
+            h('div', Object.keys(rows).map(function (key) {
+                return h('div', [
+                    h('a', { href: '/task/' + encodeURIComponent(key) }, key)
+                ]);
+            }))
+        ]));
+    }
+});
+
+router.addRoute('/tasks/new', function (m, show) {
+    show(h('div', [
+        h('h2', 'tasks'),
+        h('form', { onsubmit: onsubmit }, [
+            h('h3', 'new task'),
+            h('div.line', [
+                h('input', {
+                    type: 'text',
+                    name: 'name',
+                    placeholder: 'task name'
+                })
+            ]),
+            h('div.line', [
+                h('textarea', {
+                    name: 'description',
+                    placeholder: 'task description'
+                })
+            ]),
+            h('div.line', [
+                h('textarea', {
+                    name: 'dependencies',
+                    placeholder: 'task dependencies (one per line)'
+                })
+            ]),
+            h('div.line', [
+                h('button', { type: 'submit' }, 'create')
+            ])
+        ])
+    ]));
+    
+    function onsubmit (ev) {
+        ev.preventDefault();
+        var key = this.elements.name.value;
+        var deps = this.elements.dependencies.value.split(/\n/)
+            .map(function (line) { return line.trim() })
+            .filter(Boolean)
+        ;
+        var opts = {
+            key: key,
+            prev: m.params.hash,
+            dependencies: deps,
+            tags: [ 'task' ]
+        };
+        var w = wiki.createWriteStream(opts, function () {
+            bus.emit('go', '/task/' + encodeURIComponent(key));
+        });
+        w.end(this.elements.description.value);
+    }
+});
+
+router.addRoute('/task/:name', function (m, show) {
+    show(h('div', 'loading...'));
+    var chunks = [], hash = '';
+    var body = h('div');
+    
+    wiki.heads(m.params.name, function (err, heads) {
+        hash = heads[0].hash; // for now...
+        render();
+        wiki.createReadStream(hash).pipe(through(write));
+    });
+    function write (buf, enc, next) {
+        chunks.push(buf);
+        vhtml(marked(Buffer.concat(chunks).toString()), function (err, dom) {
+            body = dom;
+            render();
+            next();
+        });
+    }
+    
+    function render () {
+        show(h('div', [
+            h('h2', 'task'),
+            h('div.right.buttons', [
+                h('a',
+                    { href: '/task/' + encodeURIComponent(hash) + '/edit' },
+                    [ h('button', 'edit') ]
+                )
+            ]),
+            body
+        ]));
+    }
+});
+
+router.addRoute('/task/:hash/edit', function (m, show) {
+    var chunks = [], key = '', deps = [];
+    render();
+    
+    wiki.get(m.params.hash, function (err, rec) {
+        key = rec.key;
+        deps = rec.dependencies || [];
+    });
+    wiki.createReadStream(m.params.hash).pipe(through(write))
+    
+    function write (buf, enc, next) {
+        chunks.push(buf);
+        render();
+        next();
+    }
+    
+    function render () {
+        show(h('div', [
+            h('h2', 'edit task'),
+            h('h3', key),
+            h('form', { onsubmit: onsubmit }, [
+                h('div.line', [
+                    h('input', {
+                        type: 'text',
+                        name: 'name',
+                        value: key
+                    })
+                ]),
+                h('textarea',
+                    { name: 'description' },
+                    Buffer.concat(chunks).toString()
+                ),
+                h('textarea',
+                    {
+                        name: 'dependencies', 
+                        placeholder: 'dependencies (one per line)'
+                    },
+                    deps.join('\n')
+                ),
+                h('button', { type: 'submit' }, 'submit')
+            ])
+        ]));
+    }
+    
+    function onsubmit (ev) {
+        ev.preventDefault();
+        key = this.elements.name.value;
+        var deps = this.elements.dependencies.value.split(/\n/)
+            .map(function (line) { return line.trim() })
+            .filter(Boolean)
+        ;
+        var opts = {
+            key: key,
+            dependencies: deps,
+            prev: m.params.hash,
+            tags: [ 'task' ]
+        };
+        var w = wiki.createWriteStream(opts, function () {
+            bus.emit('go', '/task/' + encodeURIComponent(key));
+        });
+        w.end(this.elements.description.value);
+    }
+});
+
+bus.emit('go', location.pathname + (location.search || ''));
