@@ -66,7 +66,24 @@ bus.on('go', go);
 var router = require('routes')();
 
 router.addRoute('/', function (m, show) {
-    show(h('div', 'activity goes here...'));
+    var rows = [];
+    render();
+    wiki.recent().pipe(through.obj(write));
+    
+    function write (row, enc, next) {
+        rows.push(row);
+        render();
+        next();
+    }
+    
+    function render () {
+        show(h('div', [
+            h('h2', 'activity'),
+            h('div', rows.map(function (row) {
+                return h('div', row.hash);
+            }))
+        ]));
+    }
 });
 
 router.addRoute('/tasks', function (m, show) {
