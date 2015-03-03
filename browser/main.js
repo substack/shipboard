@@ -64,8 +64,8 @@ router.addRoute('/tasks', require('../routes/task/list.js')(
 router.addRoute('/tasks/new', require('../routes/task/new.js')(
     pages['/tasks/new'], bus, wiki
 ));
-router.addRoute('/task/:name/edit', require('../routes/task/edit.js')(
-    pages['/task/:name/edit'], bus, wiki
+router.addRoute('/task/:hash/edit', require('../routes/task/edit.js')(
+    pages['/task/:hash/edit'], bus, wiki
 ));
 router.addRoute('/task/:name', require('../routes/task/show.js')(
     pages['/task/:name'], bus, wiki

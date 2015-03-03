@@ -3,9 +3,14 @@ module.exports = function (page, bus, wiki) {
     function onsubmit (ev) {
         ev.preventDefault();
         
+        var deps = this.elements.dependencies.value.split('\n')
+            .map(function (s) { return s.trim() })
+            .filter(Boolean)
+        ;
         var opts = {
             key: this.elements.name.value,
-            tags: [ 'task' ]
+            tags: [ 'task' ],
+            dependencies: deps
         };
         var w = wiki.createWriteStream(opts, function () {
             bus.emit('go', '/task/' + encodeURIComponent(opts.key));

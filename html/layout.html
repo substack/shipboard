@@ -40,6 +40,12 @@
           </div>
           
           <div class="line">
+            <textarea name="dependencies"
+            placeholder="task dependencies (one per line)"
+            ></textarea>
+          </div>
+          
+          <div class="line">
             <button>create</button>
           </div>
         </form>
@@ -57,13 +63,17 @@
           description
         </div>
       </div>
-      <div page="/task/:name/edit">
+      <div page="/task/:hash/edit">
         <h2>edit task</h2>
         
         <h3 key="name"></h3>
         
         <form>
-          <textarea key="description"></textarea>
+          <div class="line">
+            <input type="text" name="name">
+          </div>
+          <textarea name="description"></textarea>
+          <button type="submit">submit</button>
         </form>
       </div>
       <div page="/projects">

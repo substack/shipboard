@@ -12,12 +12,12 @@ module.exports = function (page, bus, wiki) {
     var link = page.querySelector('[key=link]');
     return function (m) {
         name.textContent = m.params.name;
-        link.setAttribute('href', '/task/'
-            + encodeURIComponent(m.params.name) + '/edit'
-        );
         
         wiki.heads(m.params.name).pipe(through.obj(write));
         function write (row, enc, next) {
+            link.setAttribute('href', '/task/'
+                + encodeURIComponent(row.hash) + '/edit'
+            );
             wiki.createReadStream(row.hash).pipe(concat(function (body) {
                 desc.textContent = body.toString('utf8');
             }));
