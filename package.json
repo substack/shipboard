@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "assemble a team of hackers to build an application",
   "main": "index.js",
+  "bin": {
+    "shipboard": "bin/cmd.js"
+  },
   "dependencies": {
     "body": "^4.5.0",
     "class-list": "^0.1.1",
