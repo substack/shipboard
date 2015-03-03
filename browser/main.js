@@ -11,9 +11,8 @@ var EventEmitter = require('events').EventEmitter;
 var url = require('url');
 
 var level = require('level-browserify');
-var sublevel = require('subleveldown');
 var db = level('wiki.db');
-var wiki = require('wikidb')(sublevel(db, 'wiki'));
+var wiki = require('wikidb')(db);
 
 var bus = new EventEmitter;
 window.addEventListener('click', function (ev) {

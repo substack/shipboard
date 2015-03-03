@@ -8,12 +8,17 @@
     "class-list": "^0.1.1",
     "concat-stream": "^1.4.7",
     "ecstatic": "^0.5.8",
+    "level-browserify": "^0.18.1",
     "marked": "^0.3.3",
+    "minimist": "^1.1.0",
     "routes": "^2.0.0",
     "single-page": "^1.0.0",
+    "subleveldown": "^2.0.0",
     "through2": "^0.6.3",
+    "uglify-js": "^2.4.16",
     "virtual-dom": "^1.3.0",
-    "virtual-html": "^0.1.0"
+    "virtual-html": "^0.1.0",
+    "wikidb": "^2.0.0"
   },
   "devDependencies": {
     "tape": "^3.0.3"
@@ -21,7 +26,7 @@
   "scripts": {
     "test": "tape test/*.js",
     "start": "bin/cmd.js server",
-    "dev": "npm run start & npm run watch & wait",
+    "build": "browserify browser/main.js | uglifyjs -cm > public/bundle.js",
     "watch": "watchify browser/main.js -o public/bundle.js -dv"
   },
   "repository": {
