@@ -1,6 +1,4 @@
-var create = require('virtual-dom/create-element');
-var patch = require('virtual-dom/patch');
-var diff = require('virtual-dom/diff');
+var mainloop = require('main-loop');
 var h = require('virtual-dom/h');
 var vhtml = require('virtual-html');
 
@@ -16,6 +14,7 @@ var wiki = require('wikidb')(db);
 
 var bus = new EventEmitter;
 window.addEventListener('click', function (ev) {
+console.log('CLICK', ev.target); 
     if (ev.target.tagName !== 'a') return;
     var u = url.parse(ev.target.getAttribute('href'));
     if (u.host && u.host !== location.host) return;
@@ -23,43 +22,43 @@ window.addEventListener('click', function (ev) {
     bus.emit('go', ev.target.getAttribute('href'));
 });
 
+var initState = { href: location.pathname, page: h('div') };
+var loop = mainloop(initState, render, {
+    create: require('virtual-dom/create-element'),
+    diff: require('virtual-dom/diff'),
+    patch: require('virtual-dom/patch')
+});
+document.body.appendChild(loop.target);
+
+function render (state) {
+    var names = { '/': 'activity', '/tasks': 'tasks' };
+    var links = [ '/', '/tasks' ].map(function (href) {
+        return h('a', {
+            href: href,
+            className: state.route === href ? 'active' : ''
+        }, names[href])
+    });
+    return h('div', [
+        h('div#header', [
+            h('h1', [ h('a', { href: '/' }, 'shipboard') ]),
+            h('div.pages', links),
+        ]),
+        h('div#page', state.page)
+    ]);
+}
+
 var singlePage = require('single-page');
 var go = singlePage(function (href) {
     var m = router.match(href);
     if (!m) return console.error('404');
     
-    var tree, prev, root;
-    var page = h('div');
-    
-    m.fn(m, function (p) {
-        page = p;
-        render();
-    });
-    
-    function render () {
-        var names = { '/': 'activity', '/tasks': 'tasks' };
-        var links = [ '/', '/tasks' ].map(function (href) {
-            return h('a', {
-                href: href,
-                className: m.route === href ? 'active' : ''
-            }, names[href])
+    m.fn(m, function (page) {
+        loop.update({
+            page: page,
+            route: m.route,
+            href: href
         });
-        var tree = h('div', [
-            h('div#header', [
-                h('h1', [ h('a', { href: '/' }, 'shipboard') ]),
-                h('div.pages', links),
-            ]),
-            h('div#page', page)
-        ]);
-        if (prev) {
-            patch(root, diff(prev, tree));
-        }
-        else {
-            root = create(tree);
-            document.body.appendChild(root);
-        }
-        prev = tree;
-    }
+    });
 });
 bus.on('go', go);
 
