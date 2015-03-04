@@ -14,7 +14,6 @@ var wiki = require('wikidb')(db);
 
 var bus = new EventEmitter;
 window.addEventListener('click', function (ev) {
-console.log('CLICK', ev.target); 
     if (ev.target.tagName !== 'a') return;
     var u = url.parse(ev.target.getAttribute('href'));
     if (u.host && u.host !== location.host) return;

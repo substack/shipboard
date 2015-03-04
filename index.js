@@ -2,7 +2,10 @@ var path = require('path');
 var ecstatic = require('ecstatic');
 var fs = require('fs');
 var path = require('path');
-var st = ecstatic(path.join(__dirname, 'public'));
+var st = ecstatic({
+    root: path.join(__dirname, 'public'),
+    gzip: true
+});
 
 var router = require('routes')();
 router.addRoute('/', function () {});
