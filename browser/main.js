@@ -13,20 +13,10 @@ var db = level('wiki.db');
 var wiki = require('wikidb')(db);
 
 var bus = new EventEmitter;
-window.addEventListener('click', function (ev) {
-    var anchor = null;
-    for (var n = ev.target; n.parentNode; n = n.parentNode) {
-        if (n.tagName.toUpperCase() === 'A') {
-            anchor = n;
-            break;
-        }
-    }
-    if (!anchor) return;
-    
-    var u = url.parse(anchor.getAttribute('href'));
-    if (u.host && u.host !== location.host) return;
-    ev.preventDefault();
-    bus.emit('go', anchor.getAttribute('href'));
+
+var catcher = require('catch-links');
+catcher(window, function (href) {
+    bus.emit('go', url.parse(href).pathname);
 });
 
 var initState = { href: location.pathname, page: h('div') };

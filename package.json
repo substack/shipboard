@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "body": "^4.5.0",
+    "catch-links": "^1.0.0",
     "class-list": "^0.1.1",
     "concat-stream": "^1.4.7",
     "ecstatic": "^0.5.8",
