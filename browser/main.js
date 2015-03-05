@@ -14,11 +14,19 @@ var wiki = require('wikidb')(db);
 
 var bus = new EventEmitter;
 window.addEventListener('click', function (ev) {
-    if (ev.target.tagName !== 'a') return;
-    var u = url.parse(ev.target.getAttribute('href'));
+    var anchor = null;
+    for (var n = ev.target; n.parentNode; n = n.parentNode) {
+        if (n.tagName.toUpperCase() === 'A') {
+            anchor = n;
+            break;
+        }
+    }
+    if (!anchor) return;
+    
+    var u = url.parse(anchor.getAttribute('href'));
     if (u.host && u.host !== location.host) return;
     ev.preventDefault();
-    bus.emit('go', ev.target.getAttribute('href'));
+    bus.emit('go', anchor.getAttribute('href'));
 });
 
 var initState = { href: location.pathname, page: h('div') };
