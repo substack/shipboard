@@ -28,7 +28,7 @@ Each task can depend on other tasks as dependencies.
 
 # todo
 
-* tag tasks with "working on" status for users
+* tag tasks with "working on" status for users (cookie lickers)
 * each unfinished task gets a gantt chart
 
 # license
