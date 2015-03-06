@@ -53,6 +53,7 @@ bus.on('go', go);
 
 var router = require('routes')();
 router.addRoute('/', require('../routes/home.js')(wiki));
+router.addRoute('/activity', require('../routes/activity.js')(wiki));
 router.addRoute('/tasks', require('../routes/task_list.js')(wiki));
 router.addRoute('/tasks/new', require('../routes/task_new.js')(wiki));
 router.addRoute('/task/:name', require('../routes/task_show.js')(wiki));

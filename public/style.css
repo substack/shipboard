@@ -92,3 +92,7 @@ button:hover {
   float: right;
   width: 150px;
 }
+
+.task {
+  margin-bottom: 1em;
+}
