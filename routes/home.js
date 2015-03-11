@@ -20,13 +20,22 @@ module.exports = function home (wiki) {
                 h('h2', 'shipboard'),
                 h('div', rows.map(function (row) {
                     var href = '/task/' + row.meta.key;
+                    var d = new Date(row.meta.time);
+                    var ymd = strftime('%Y-%m-%d', d);
+                    var time = strftime('%T', d);
+                    var ago = timeago(new Date(row.meta.time));
+                    
                     return h('div.task', [
                         'anonymous updated ',
                         h('a', { href: href }, row.meta.key),
                         
-                        h('div', [
-                            '(' + timeago(new Date(row.meta.time)) + ')',
-                            ' @ ' + strftime('%T', new Date(row.meta.time))
+                        h('div.when', [
+                            h('span.ago', ago),
+                            ' @ (',
+                            h('span.ymd', ymd),
+                            h('span.T', ' T '),
+                            h('span.time', time),
+                            ')'
                         ])
                     ]);
                 }))

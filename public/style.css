@@ -96,3 +96,21 @@ button:hover {
 .task {
   margin-bottom: 1em;
 }
+
+.task .when {
+  color: #a05050;
+}
+
+.task .ago {
+}
+
+.task .ymd {
+  color: #50a050;
+}
+
+.task .T {
+}
+
+.task .time {
+  color: #50a050;
+}
