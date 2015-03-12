@@ -6,7 +6,7 @@ module.exports = function (wiki, bus) {
 };
 
 function edit (wiki, bus, m, show) {
-    var chunks = [], key = '', deps = [];
+    var chunks = [], key = '', deps = [], tags = [];
     
     var titleName = '';
     var editingTitle = false;
@@ -23,6 +23,7 @@ function edit (wiki, bus, m, show) {
         key = rec.key;
         titleName = key;
         deps = rec.dependencies || [];
+        tags = (rec.tags || []).filter(not('task'));;
     });
     wiki.createReadStream(m.params.hash).pipe(through(write))
     
@@ -59,15 +60,27 @@ function edit (wiki, bus, m, show) {
                     value: key,
                 }),
                 h('textarea',
-                    { name: 'description' },
+                    {
+                        name: 'description',
+                        placeholder: 'description'
+                    },
                     Buffer.concat(chunks).toString()
                 ),
+                h('h3', 'dependencies'),
                 h('textarea',
                     {
                         name: 'dependencies', 
                         placeholder: 'dependencies (one per line)'
                     },
                     deps.join('\n')
+                ),
+                h('h3', 'tags'),
+                h('textarea',
+                    {
+                        name: 'tags', 
+                        placeholder: 'tags (one per line)'
+                    },
+                    tags.join('\n')
                 ),
                 h('button', { type: 'submit' }, 'submit')
             ])
@@ -108,3 +121,7 @@ function edit (wiki, bus, m, show) {
         w.end('');
     }
 };
+
+function not (x) {
+    return function (y) { return x !== y };
+}
