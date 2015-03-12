@@ -10,6 +10,7 @@ var st = ecstatic({
 var router = require('routes')();
 router.addRoute('/', function () {});
 router.addRoute('/activity', function () {});
+router.addRoute('/tags', function () {});
 router.addRoute('/tasks', function () {});
 router.addRoute('/tasks/new', function () {});
 router.addRoute('/task/:hash/edit', function () {});

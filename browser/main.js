@@ -24,8 +24,12 @@ var loop = mainloop(initState, render, {
 document.body.appendChild(loop.target);
 
 function render (state) {
-    var names = { '/': 'activity', '/tasks': 'tasks' };
-    var links = [ '/', '/tasks' ].map(function (href) {
+    var names = {
+        '/': 'activity',
+        '/tasks': 'tasks',
+        '/tags': 'tags'
+    };
+    var links = [ '/', '/tasks', '/tags' ].map(function (href) {
         return h('a', {
             href: href,
             className: state.route === href ? 'active' : ''
@@ -54,6 +58,7 @@ bus.on('go', go);
 var router = require('routes')();
 router.addRoute('/', require('../routes/home.js')(wiki));
 router.addRoute('/activity', require('../routes/activity.js')(wiki));
+router.addRoute('/tags', require('../routes/tag_list.js')(wiki));
 router.addRoute('/tasks', require('../routes/task_list.js')(wiki));
 router.addRoute('/tasks/new', require('../routes/task_new.js')(wiki, bus));
 router.addRoute('/task/:name', require('../routes/task_show.js')(wiki));
