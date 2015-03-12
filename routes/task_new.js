@@ -31,6 +31,12 @@ function render (wiki, m, bus) {
                 })
             ]),
             h('div.line', [
+                h('textarea', {
+                    name: 'tags',
+                    placeholder: 'tags (one per line)'
+                })
+            ]),
+            h('div.line', [
                 h('button', { type: 'submit' }, 'create')
             ])
         ])
@@ -41,13 +47,17 @@ function render (wiki, m, bus) {
         var key = this.elements.name.value;
         var deps = this.elements.dependencies.value.split(/\n/)
             .map(function (line) { return line.trim() })
-            .filter(Boolean)
+            .filter(function (x) { return /\S/.test(x) })
+        ;
+        var tags = this.elements.tags.value.split(/\n/)
+            .map(function (line) { return line.trim() })
+            .filter(function (x) { return /\S/.test(x) })
         ;
         var opts = {
             key: key,
-            prev: m.params.hash,
             dependencies: deps,
-            tags: [ 'task' ]
+            prev: m.params.hash,
+            tags: uniq([ 'task' ].concat(tags))
         };
         var w = wiki.createWriteStream(opts, function () {
             bus.emit('go', '/task/' + encodeURIComponent(key));
