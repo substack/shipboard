@@ -1,5 +1,6 @@
 var through = require('through2');
 var h = require('virtual-dom/h');
+var uniq = require('uniq');
 
 module.exports = function (wiki, bus) {
     return function (m, show) { return edit(wiki, bus, m, show) };
@@ -92,13 +93,17 @@ function edit (wiki, bus, m, show) {
         key = this.elements.name.value;
         var deps = this.elements.dependencies.value.split(/\n/)
             .map(function (line) { return line.trim() })
-            .filter(Boolean)
+            .filter(function (x) { return /\S/ })
+        ;
+        var tags = this.elements.tags.value.split(/\n/)
+            .map(function (line) { return line.trim() })
+            .filter(function (x) { return /\S/ })
         ;
         var opts = {
             key: key,
             dependencies: deps,
             prev: m.params.hash,
-            tags: [ 'task' ]
+            tags: uniq([ 'task' ].concat(tags))
         };
         var w = wiki.createWriteStream(opts, function () {
             bus.emit('go', '/task/' + encodeURIComponent(key));
