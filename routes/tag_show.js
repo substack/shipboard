@@ -14,7 +14,9 @@ module.exports = function (wiki) {
             wiki.get(row.hash, function (err, meta) {
                 meta.duration = '1 week';
                 meta.dependencies = (meta.dependencies || [])
-                    .filter(function (x) { return /\S/.test(x) })
+                    .filter(function (x) {
+                        return /\S/.test(x) && x !== meta.key;
+                    })
                 ;
                 meta.dependencies.forEach(function (dep) {
                     if (!has(g.tasks, dep)) {
