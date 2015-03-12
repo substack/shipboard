@@ -34,7 +34,7 @@ function edit (wiki, bus, m, show) {
     
     function render () {
         var title = h('h3', [ editingTitle
-            ? h('input.hidden', {
+            ? h('input', {
                 type: 'text',
                 name: 'name',
                 value: titleName,
@@ -42,12 +42,17 @@ function edit (wiki, bus, m, show) {
                 onchange: function () { titleName = this.value },
                 onkeydown: function () { titleName = this.value }
             })
-            : h('span', { onclick: showTitleEdit }, titleName)
+            : h('div', { onclick: showTitleEdit }, titleName)
         ]);
         return h('div', [
             h('h2', 'edit task'),
             h('form', { onsubmit: onsubmit }, [
                 title,
+                h('input', {
+                    type: 'hidden',
+                    name: 'prevName',
+                    value: key,
+                }),
                 h('textarea',
                     { name: 'description' },
                     Buffer.concat(chunks).toString()
