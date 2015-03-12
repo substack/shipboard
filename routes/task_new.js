@@ -1,12 +1,12 @@
 var h = require('virtual-dom/h');
 
-module.exports = function newTask (wiki) {
+module.exports = function newTask (wiki, bus) {
     return function (m, show) {
-        show(render(wiki));
+        show(render(wiki, m, bus));
     };
 };
 
-function render (wiki) {
+function render (wiki, m, bus) {
     return h('div', [
         h('h2', 'tasks'),
         h('form', { onsubmit: onsubmit }, [
