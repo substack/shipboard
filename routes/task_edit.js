@@ -33,20 +33,25 @@ function edit (wiki, bus, m, show) {
     }
     
     function render () {
-        var title = h('h3', [ editingTitle
-            ? h('input', {
-                type: 'text',
-                name: 'name',
-                value: titleName,
-                onblur: hideTitleEdit,
-                onchange: function () { titleName = this.value },
-                onkeydown: function () { titleName = this.value }
-            })
-            : h('div', { onclick: showTitleEdit }, titleName)
+        var input = h('input', {
+            type: editingTitle ? 'text' : 'hidden',
+            name: 'name',
+            value: titleName,
+            onblur: hideTitleEdit,
+            onchange: function () { titleName = this.value },
+            onkeydown: function () { titleName = this.value }
+        });
+        var title = h('h3', [
+            input,
+            editingTitle ? '' : h('div', { onclick: showTitleEdit }, titleName)
         ]);
+        
         return h('div', [
             h('h2', 'edit task'),
             h('form', { onsubmit: onsubmit }, [
+                h('div.right', [
+                    h('button', { onclick: onremove }, 'remove'),
+                ]),
                 title,
                 h('input', {
                     type: 'hidden',
@@ -86,5 +91,20 @@ function edit (wiki, bus, m, show) {
             bus.emit('go', '/task/' + encodeURIComponent(key));
         });
         w.end(this.elements.description.value);
+    }
+    
+    function onremove (ev) {
+        ev.preventDefault();
+        
+        var opts = {
+            key: key,
+            dependencies: {},
+            prev: m.params.hash,
+            tags: []
+        };
+        var w = wiki.createWriteStream(opts, function () {
+            bus.emit('go', '/tasks');
+        });
+        w.end('');
     }
 };
