@@ -8,6 +8,7 @@ module.exports = function (wiki, bus) {
 
 function edit (wiki, bus, m, show) {
     var chunks = [], key = '', deps = [], tags = [];
+    var duration = '';
     
     var titleName = '';
     var editingTitle = false;
@@ -22,6 +23,7 @@ function edit (wiki, bus, m, show) {
     
     wiki.get(m.params.hash, function (err, rec) {
         key = rec.key;
+        duration = rec.duration || '1 week';
         titleName = key;
         deps = rec.dependencies || [];
         tags = (rec.tags || []).filter(not('task'));;
@@ -59,6 +61,12 @@ function edit (wiki, bus, m, show) {
                     type: 'hidden',
                     name: 'prevName',
                     value: key,
+                }),
+                h('input', {
+                    type: 'text',
+                    name: 'duration',
+                    value: duration,
+                    placeholder: 'duration'
                 }),
                 h('textarea',
                     {
@@ -101,6 +109,7 @@ function edit (wiki, bus, m, show) {
         ;
         var opts = {
             key: key,
+            duration: this.elements.duration.value,
             dependencies: deps,
             prev: m.params.hash,
             tags: uniq([ 'task' ].concat(tags))

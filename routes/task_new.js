@@ -20,6 +20,13 @@ function render (wiki, m, bus) {
                 })
             ]),
             h('div.line', [
+                h('input', {
+                    type: 'text',
+                    name: 'duration',
+                    value: '1 week'
+                })
+            ]),
+            h('div.line', [
                 h('textarea', {
                     name: 'description',
                     placeholder: 'task description'
@@ -56,6 +63,7 @@ function render (wiki, m, bus) {
         ;
         var opts = {
             key: key,
+            duration: this.elements.duration.value,
             dependencies: deps,
             prev: m.params.hash,
             tags: uniq([ 'task' ].concat(tags))
