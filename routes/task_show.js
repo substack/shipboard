@@ -17,7 +17,7 @@ module.exports = function (wiki) {
         function write (buf, enc, next) {
             chunks.push(buf);
             var mstr = marked(Buffer.concat(chunks).toString());
-            vhtml(mstr, function (err, dom) {
+            vhtml('<div>' + mstr + '</div>\n', function (err, dom) {
                 body = dom;
                 show(render(body, hash));
                 next();
