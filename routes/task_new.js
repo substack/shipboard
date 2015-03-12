@@ -1,4 +1,5 @@
 var h = require('virtual-dom/h');
+var uniq = require('uniq');
 
 module.exports = function newTask (wiki, bus) {
     return function (m, show) {
