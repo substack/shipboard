@@ -93,11 +93,11 @@ function edit (wiki, bus, m, show) {
         key = this.elements.name.value;
         var deps = this.elements.dependencies.value.split(/\n/)
             .map(function (line) { return line.trim() })
-            .filter(function (x) { return /\S/ })
+            .filter(function (x) { return /\S/.test(x) })
         ;
         var tags = this.elements.tags.value.split(/\n/)
             .map(function (line) { return line.trim() })
-            .filter(function (x) { return /\S/ })
+            .filter(function (x) { return /\S/.test(x) })
         ;
         var opts = {
             key: key,

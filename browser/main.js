@@ -59,6 +59,7 @@ var router = require('routes')();
 router.addRoute('/', require('../routes/home.js')(wiki));
 router.addRoute('/activity', require('../routes/activity.js')(wiki));
 router.addRoute('/tags', require('../routes/tag_list.js')(wiki));
+router.addRoute('/tag/:name', require('../routes/tag_show.js')(wiki));
 router.addRoute('/tasks', require('../routes/task_list.js')(wiki));
 router.addRoute('/tasks/new', require('../routes/task_new.js')(wiki, bus));
 router.addRoute('/task/:name', require('../routes/task_show.js')(wiki));
