@@ -7,10 +7,21 @@ module.exports = function (wiki, bus) {
 
 function edit (wiki, bus, m, show) {
     var chunks = [], key = '', deps = [];
+    
+    var titleName = '';
+    var editingTitle = false;
+    function setTitleEdit (v) {
+        editingTitle = v;
+        show(render());
+    }
+    function showTitleEdit () { setTitleEdit(true) }
+    function hideTitleEdit () { setTitleEdit(false) }
+    
     show(render());
     
     wiki.get(m.params.hash, function (err, rec) {
         key = rec.key;
+        titleName = key;
         deps = rec.dependencies || [];
     });
     wiki.createReadStream(m.params.hash).pipe(through(write))
@@ -22,17 +33,21 @@ function edit (wiki, bus, m, show) {
     }
     
     function render () {
+        var title = h('h3', [ editingTitle
+            ? h('input.hidden', {
+                type: 'text',
+                name: 'name',
+                value: titleName,
+                onblur: hideTitleEdit,
+                onchange: function () { titleName = this.value },
+                onkeydown: function () { titleName = this.value }
+            })
+            : h('span', { onclick: showTitleEdit }, titleName)
+        ]);
         return h('div', [
             h('h2', 'edit task'),
-            h('h3', key),
             h('form', { onsubmit: onsubmit }, [
-                h('div.line', [
-                    h('input', {
-                        type: 'text',
-                        name: 'name',
-                        value: key
-                    })
-                ]),
+                title,
                 h('textarea',
                     { name: 'description' },
                     Buffer.concat(chunks).toString()
