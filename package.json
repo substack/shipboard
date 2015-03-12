@@ -36,7 +36,7 @@
     "test": "tape test/*.js",
     "start": "bin/cmd.js server",
     "build": "browserify browser/main.js | uglifyjs -cm | gzip > public/bundle.js.gz",
-    "watch": "rm public/bundle.js.gz; watchify browser/main.js -o public/bundle.js -dv",
+    "watch": "rm -f public/bundle.js.gz; watchify browser/main.js -o public/bundle.js -dv",
     "prepublish": "npm run build"
   },
   "repository": {

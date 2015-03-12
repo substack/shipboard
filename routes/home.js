@@ -7,12 +7,13 @@ module.exports = function home (wiki) {
     return function (m, show) {
         var rows = [];
         show(render());
+        var count = 0;
         wiki.recent().pipe(through.obj(write));
         
         function write (row, enc, next) {
             rows.push(row);
             show(render());
-            next();
+            if (++count < 10) next();
         }
         
         function render () {
