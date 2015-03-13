@@ -6,22 +6,16 @@ var st = ecstatic({
     root: path.join(__dirname, 'public'),
     gzip: true
 });
+var routes = require('./routes');
 
-var router = require('routes')();
-router.addRoute('/', function () {});
-router.addRoute('/activity', function () {});
-router.addRoute('/tags', function () {});
-router.addRoute('/tag/:name', function () {});
-router.addRoute('/tasks', function () {});
-router.addRoute('/tasks/new', function () {});
-router.addRoute('/task/:hash/edit', function () {});
-router.addRoute('/task/:name', function () {});
-
-module.exports = function (req, res) {
-    if (router.match(req.url)) {
-        fs.createReadStream(path.join(__dirname, 'public/index.html'))
-            .pipe(res)
-        ;
-    }
-    else st(req, res);
+module.exports = function (wiki, bus) {
+    var router = routes(wiki, bus);
+    return function (req, res) {
+        if (router.match(req.url)) {
+            fs.createReadStream(path.join(__dirname, 'public/index.html'))
+                .pipe(res)
+            ;
+        }
+        else st(req, res);
+    };
 };

@@ -9,6 +9,7 @@ var db = level('wiki.db');
 var wiki = require('wikidb')(db);
 
 var bus = new EventEmitter;
+var router = require('../routes')(wiki, bus);
 
 var catcher = require('catch-links');
 catcher(window, function (href) {
@@ -55,15 +56,5 @@ var go = singlePage(function (href) {
 });
 bus.on('go', go);
 
-var router = require('routes')();
-router.addRoute('/', require('../routes/home.js')(wiki));
-router.addRoute('/activity', require('../routes/activity.js')(wiki));
-router.addRoute('/tags', require('../routes/tag_list.js')(wiki));
-router.addRoute('/tag/:name', require('../routes/tag_show.js')(wiki));
-router.addRoute('/tasks', require('../routes/task_list.js')(wiki));
-router.addRoute('/tasks/new', require('../routes/task_new.js')(wiki, bus));
-router.addRoute('/task/:name', require('../routes/task_show.js')(wiki));
-router.addRoute('/task/:hash/edit',
-    require('../routes/task_edit.js')(wiki, bus)
-);
+require('../routes')(wiki, bus);
 bus.emit('go', location.pathname + (location.search || ''));
