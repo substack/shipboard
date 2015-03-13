@@ -22,3 +22,9 @@ var server = http.createServer(handle(wiki, bus));
 server.listen(argv.port, function () {
     console.log('listening on :'  + server.address().port);
 });
+
+var websocket = require('websocket-stream');
+var wsock = websocket.createServer({ server: server }, whandle);
+function whandle (stream) {
+    stream.pipe(wiki.replicate()).pipe(stream);
+}
