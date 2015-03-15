@@ -23,7 +23,13 @@ var loop = mainloop(initState, layout, {
     diff: require('virtual-dom/diff'),
     patch: require('virtual-dom/patch')
 });
-document.querySelector('#content').appendChild(loop.target);
+
+var vhtml = require('virtual-html');
+var diff = require('virtual-dom/diff');
+
+var root = document.querySelector('#content');
+root.innerHTML = '';
+root.appendChild(loop.target);
 
 var singlePage = require('single-page');
 var go = singlePage(function (href) {
