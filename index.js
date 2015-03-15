@@ -10,7 +10,7 @@ var st = ecstatic({
     gzip: true
 });
 var routes = require('./routes');
-var layout = require('./layout.js');
+var layout = require('./lib/layout.js');
 
 module.exports = function (wiki, bus) {
     var router = routes(wiki, bus);
@@ -20,6 +20,9 @@ module.exports = function (wiki, bus) {
         
         m.partial = false;
         m.fn(m, function (page) {
+            if (page.statusCode) res.statusCode = page.statusCode;
+            res.setHeader('content-type', 'text/html');
+            
             var tree = layout({
                 href: req.url,
                 page: page,

@@ -2,13 +2,17 @@ var through = require('through2');
 var strftime = require('strftime');
 var h = require('virtual-dom/h');
 var timeago = require('timeago');
+var onerror = require('../lib/onerror.js');
+var error = require('../lib/error.js');
 
 module.exports = function home (wiki) {
     return function (m, show) {
         var rows = [];
         if (m.partial) show(render());
         var count = 0;
-        wiki.recent().pipe(through.obj(write, end));
+        onerror(wiki.recent(), show, error)
+            .pipe(through.obj(write, end))
+        ;
         
         function write (row, enc, next) {
             rows.push(row);

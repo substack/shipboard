@@ -1,11 +1,13 @@
 var through = require('through2');
 var h = require('virtual-dom/h');
+var onerror = require('../lib/onerror.js');
 
 module.exports = function home (wiki) {
     return function (m, show) {
         var rows = [];
         if (m.partial) show(render());
-        wiki.recent().pipe(through.obj(write, end));
+        onerror(wiki.recent(), show, error)
+            .pipe(through.obj(write, end));
         
         function write (row, enc, next) {
             rows.push(row);

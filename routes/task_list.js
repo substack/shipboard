@@ -1,11 +1,16 @@
 var h = require('virtual-dom/h');
 var through = require('through2');
+var error = require('../lib/error.js');
+var onerror = require('../lib/onerror.js');
 
 module.exports = function taskList (wiki) {
     return function (m, show) {
         var rows = {};
         if (m.partial) show(render(rows));
-        wiki.byTag('task').pipe(through.obj(write, end));
+        
+        onerror(wiki.byTag('task'), show, error)
+            .pipe(through.obj(write, end))
+        ;
         
         function write (row, enc, next) {
             rows[row.key] = row;

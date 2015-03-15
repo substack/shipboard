@@ -2,13 +2,17 @@ var h = require('virtual-dom/h');
 var through = require('through2');
 var gantt = require('gantt-chart');
 var has = require('has');
+var onerror = require('../lib/onerror.js');
+var error = require('../lib/error.js');
 
 module.exports = function (wiki) {
     return function (m, show) {
         if (m.partial) show(h('div', 'loading...'));
         
         var g = gantt();
-        wiki.byTag(m.params.name).pipe(through.obj(write, end));
+        onerror(wiki.byTag(m.params.name), show, error)
+            .pipe(through.obj(write, end))
+        ;
         
         function write (row, enc, next) {
             wiki.get(row.hash, function (err, meta) {

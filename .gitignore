@@ -1,3 +1,5 @@
 public/bundle.js
+public/.bundle.js
 public/bundle.js.gz
 node_modules
+shipboard-data

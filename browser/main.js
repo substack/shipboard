@@ -16,7 +16,7 @@ catcher(window, function (href) {
     bus.emit('go', url.parse(href).pathname);
 });
 
-var layout = require('../layout.js');
+var layout = require('../lib/layout.js');
 var initState = { href: location.pathname, page: h('div') };
 var loop = mainloop(initState, layout, {
     create: require('virtual-dom/create-element'),

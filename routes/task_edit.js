@@ -1,6 +1,8 @@
 var through = require('through2');
 var h = require('virtual-dom/h');
 var uniq = require('uniq');
+var onerror = require('../lib/onerror.js');
+var error = require('../lib/error.js');
 
 module.exports = function (wiki, bus) {
     return function (m, show) { return edit(wiki, bus, m, show) };
@@ -22,13 +24,16 @@ function edit (wiki, bus, m, show) {
     if (m.partial) show(render());
     
     wiki.get(m.params.hash, function (err, rec) {
+        if (err) return show(err);
         key = rec.key;
         duration = rec.duration || '1 week';
         titleName = key;
         deps = rec.dependencies || [];
         tags = (rec.tags || []).filter(not('task'));;
     });
-    wiki.createReadStream(m.params.hash).pipe(through(write, end))
+    onerror(wiki.createReadStream(m.params.hash), show, error)
+        .pipe(through(write, end))
+    ;
     
     function write (buf, enc, next) {
         chunks.push(buf);
