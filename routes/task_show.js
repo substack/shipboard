@@ -5,22 +5,30 @@ var marked = require('marked');
 
 module.exports = function (wiki) {
     return function (m, show) {
-        show(h('div', 'loading...'));
+        if (m.partial) show(h('div', 'loading...'));
         var chunks = [], hash = '';
         var body = h('div');
         
         wiki.heads(m.params.name, function (err, heads) {
             hash = heads[0].hash; // for now...
-            show(render(body, hash));
-            wiki.createReadStream(hash).pipe(through(write));
+            if (m.partial) show(render(body, hash));
+            wiki.createReadStream(hash).pipe(through(write, end));
         });
         function write (buf, enc, next) {
             chunks.push(buf);
+            if (m.partial) showChunks(next);
+            else next();
+        }
+        function end () {
+            if (!m.partial) showChunks();
+        }
+        
+        function showChunks (next) {
             var mstr = marked(Buffer.concat(chunks).toString());
             vhtml('<div>' + mstr + '</div>\n', function (err, dom) {
                 body = dom;
                 show(render(body, hash));
-                next();
+                if (next) next();
             });
         }
     }

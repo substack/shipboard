@@ -5,10 +5,10 @@ var has = require('has');
 
 module.exports = function (wiki) {
     return function (m, show) {
-        show(h('div', 'loading...'));
+        if (m.partial) show(h('div', 'loading...'));
         
         var g = gantt();
-        wiki.byTag(m.params.name).pipe(through.obj(write));
+        wiki.byTag(m.params.name).pipe(through.obj(write, end));
         
         function write (row, enc, next) {
             wiki.get(row.hash, function (err, meta) {
@@ -25,10 +25,14 @@ module.exports = function (wiki) {
                 });
                 
                 g.add(meta.key, meta);
-                show(render());
+                if (m.partial) show(render());
             });
             next();
         }
+        function end () {
+            if (!m.partial) show(render());
+        }
+        
         function render () {
             return h('div', [
                 h('h2', m.params.name),

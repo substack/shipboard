@@ -6,14 +6,17 @@ var timeago = require('timeago');
 module.exports = function home (wiki) {
     return function (m, show) {
         var rows = [];
-        show(render());
+        if (m.partial) show(render());
         var count = 0;
-        wiki.recent().pipe(through.obj(write));
+        wiki.recent().pipe(through.obj(write, end));
         
         function write (row, enc, next) {
             rows.push(row);
-            show(render());
+            if (m.partial) show(render());
             if (++count < 10) next();
+        }
+        function end () {
+            if (!m.partial) show(render());
         }
         
         function render () {

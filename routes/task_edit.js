@@ -19,7 +19,7 @@ function edit (wiki, bus, m, show) {
     function showTitleEdit () { setTitleEdit(true) }
     function hideTitleEdit () { setTitleEdit(false) }
     
-    show(render());
+    if (m.partial) show(render());
     
     wiki.get(m.params.hash, function (err, rec) {
         key = rec.key;
@@ -28,12 +28,15 @@ function edit (wiki, bus, m, show) {
         deps = rec.dependencies || [];
         tags = (rec.tags || []).filter(not('task'));;
     });
-    wiki.createReadStream(m.params.hash).pipe(through(write))
+    wiki.createReadStream(m.params.hash).pipe(through(write, end))
     
     function write (buf, enc, next) {
         chunks.push(buf);
-        show(render());
+        if (m.partial) show(render());
         next();
+    }
+    function end () {
+        if (!m.partial) show(render());
     }
     
     function render () {
