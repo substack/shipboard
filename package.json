@@ -23,7 +23,6 @@
     "routes": "^2.0.0",
     "single-page": "^1.0.0",
     "strftime": "^0.8.2",
-    "subleveldown": "^2.0.0",
     "through2": "^0.6.3",
     "timeago": "^0.2.0",
     "uglify-js": "^2.4.16",

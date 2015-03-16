@@ -20,6 +20,10 @@ body {
   text-decoration: underline;
 }
 
+#header .buttons {
+  float: right;
+}
+
 #header .pages {
   margin-left: -5ex;
 }
@@ -114,4 +118,15 @@ button:hover {
 
 .task .time {
   color: #50a050;
+}
+
+#sync button {
+  margin-right: 30px;
+}
+
+#sync input[name="url"] {
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 1em;
+  margin-top: 1em;
 }

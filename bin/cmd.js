@@ -24,7 +24,10 @@ server.listen(argv.port, function () {
 });
 
 var websocket = require('websocket-stream');
-var wsock = websocket.createServer({ server: server }, whandle);
+var wsock = websocket.createServer({
+    server: server,
+    path: '/sync'
+}, whandle);
 function whandle (stream) {
-    stream.pipe(wiki.replicate()).pipe(stream);
+    stream.pipe(wiki.replicate({ mode: 'sync' })).pipe(stream);
 }
