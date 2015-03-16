@@ -63,6 +63,7 @@ function handle (wiki, m, show) {
             }
             var whref = 'ws://' + u.host + '/' + mode;
             logs.splice(0);
+            log('replication mode ' + mode);
             log('connecting to ' + whref);
             
             var ws = wsock(whref);
