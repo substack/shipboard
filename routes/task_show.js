@@ -10,12 +10,14 @@ module.exports = function (wiki) {
         if (m.partial) show(h('div', 'loading...'));
         var chunks = {};
         var body = {};
+        var pending = 0;
         
         wiki.heads(m.params.name, function (err, heads) {
             if (err) return show(error(err))
             if (heads.length === 0) {
                 return show(error('404 task not found', 404));
             }
+            pending += heads.length;
             
             heads.forEach(function (h) {
                 onerror(wiki.createReadStream(h.hash), show, error)
@@ -35,7 +37,7 @@ module.exports = function (wiki) {
                 else next();
             }
             function end () {
-                if (!m.partial) showChunks();
+                if (!m.partial && --pending === 0) showChunks();
             }
             function showChunks (next) {
                 var mstr = marked(Buffer.concat(chunks[hash]).toString());
