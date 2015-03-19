@@ -24,7 +24,7 @@ module.exports = function home (wiki) {
         }
         
         function render () {
-            return h('div', [
+            return h('div#home', [
                 h('h2', 'shipboard'),
                 h('div', rows.map(function (row) {
                     var href = '/task/' + row.meta.key;

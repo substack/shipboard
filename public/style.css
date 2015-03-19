@@ -98,25 +98,25 @@ button:hover {
   width: 150px;
 }
 
-.task {
+#home .task {
   margin-bottom: 1em;
 }
 
-.task .when {
+#home .task .when {
   color: #a05050;
 }
 
-.task .ago {
+#home .task .ago {
 }
 
-.task .ymd {
+#home .task .ymd {
   color: #50a050;
 }
 
-.task .T {
+#home .task .T {
 }
 
-.task .time {
+#home .task .time {
   color: #50a050;
 }
 
@@ -130,4 +130,9 @@ button:hover {
   width: 100%;
   margin-bottom: 1em;
   margin-top: 1em;
+}
+
+#show-task .task .hash {
+  font-size: 0.8em;
+  color: #a080c0;
 }

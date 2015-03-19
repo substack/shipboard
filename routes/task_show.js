@@ -12,14 +12,20 @@ module.exports = function (wiki) {
         var body = {};
         var pending = 0;
         
+        if (/^[0-9a-f]{64}$/.test(m.params.name)) {
+            pending ++;
+            return onerror(wiki.createReadStream(m.params.name), show, error)
+                .pipe(save(m.params.name))
+            ;
+        }
+        
         wiki.heads(m.params.name, function (err, heads) {
             if (err) return show(error(err))
             if (heads.length === 0) {
                 return show(error('404 task not found', 404));
             }
-            pending += heads.length;
-            
             heads.forEach(function (h) {
+                pending ++;
                 onerror(wiki.createReadStream(h.hash), show, error)
                     .pipe(save(h.hash))
                 ;
@@ -53,19 +59,25 @@ module.exports = function (wiki) {
     
     function render (body) {
         var hashes = Object.keys(body);
-        var href = '/task/'
-            + encodeURIComponent(hashes.join(','))
-            + '/edit'
-        ;
-        return h('div', [
+        return h('div#show-task', [
             h('h2', 'task'),
-            h('div.right.buttons', [
-                h('a', { href: href }, [
-                    h('button', 'edit')
-                ])
-            ]),
-            Object.keys(body).map(function (key) {
-                return h('div', [ body[key], h('hr') ]);
+            Object.keys(body).map(function (hash) {
+                var href = '/task/'
+                    + encodeURIComponent(hash)
+                    + '/edit'
+                ;
+                return h('div.task', [
+                    h('div.right.buttons', [
+                        h('a', { href: href }, [
+                            h('button', 'edit')
+                        ])
+                    ]),
+                    h('div.hash', h('a', {
+                        href: '/task/' + hash
+                    }, hash)),
+                    body[hash],
+                    h('hr')
+                ]);
             })
         ]);
     }
