@@ -95,7 +95,8 @@ button:hover {
 
 .right {
   float: right;
-  width: 150px;
+  text-align: right;
+  width: 250px;
 }
 
 #home .task {
@@ -136,4 +137,11 @@ button:hover {
   font-size: 0.8em;
   color: #a080c0;
   word-wrap: break-word;
+}
+
+#show-task .bottom-buttons {
+  min-height: 1.5em;
+}
+#show-task .bottom-buttons button {
+  margin-left: 5px;
 }

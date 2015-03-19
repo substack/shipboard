@@ -65,9 +65,10 @@ module.exports = function (wiki) {
     
     function render (body) {
         var hashes = Object.keys(body);
-        var merge = h('div', [
+        var merge = h('div.bottom-buttons', [
             h('div.merge-buttons.right', [
-                h('button', 'merge')
+                h('button', 'merge'),
+                h('button', 'select all')
             ])
         ]);
         
