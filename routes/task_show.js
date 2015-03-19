@@ -67,9 +67,12 @@ module.exports = function (wiki) {
         
         function render (body) {
             var hashes = Object.keys(body);
+            var mergehref = '/task/' + hashes.sort().join(',') + '/merge';
             var merge = h('div.bottom-buttons', [
                 h('div.merge-buttons.right', [
-                    h('button', 'merge'),
+                    h('a', { href: mergehref }, [
+                        h('button', 'merge')
+                    ]),
                     h('button.all', { onclick: all }, 'all'),
                     h('button.none', { onclick: none }, 'none')
                 ])

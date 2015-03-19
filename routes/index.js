@@ -11,5 +11,6 @@ module.exports = function (wiki, bus) {
     router.addRoute('/tasks/new', require('./task_new.js')(wiki, bus));
     router.addRoute('/task/:name', require('./task_show.js')(wiki));
     router.addRoute('/task/:hash/edit', require('./task_edit.js')(wiki, bus));
+    router.addRoute('/task/:hash/merge', require('./task_merge.js')(wiki, bus));
     return router;
 };
