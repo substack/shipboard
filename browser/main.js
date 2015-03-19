@@ -24,9 +24,6 @@ var loop = mainloop(initState, layout, {
     patch: require('virtual-dom/patch')
 });
 
-var vhtml = require('virtual-html');
-var diff = require('virtual-dom/diff');
-
 var root = document.querySelector('#content');
 root.innerHTML = '';
 root.appendChild(loop.target);

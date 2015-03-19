@@ -9,7 +9,8 @@ module.exports = function (wiki, bus) {
 };
 
 function edit (wiki, bus, m, show) {
-    var chunks = [], key = '', deps = [], tags = [];
+    var chunks = {};
+    var key = '', deps = [], tags = [];
     var duration = '';
     
     var titleName = '';
@@ -23,26 +24,31 @@ function edit (wiki, bus, m, show) {
     
     if (m.partial) show(render());
     
-    wiki.get(m.params.hash, function (err, rec) {
-        if (err) return show(err);
-        key = rec.key;
-        duration = rec.duration || '1 week';
-        titleName = key;
-        deps = rec.dependencies || [];
-        tags = (rec.tags || []).filter(not('task'));;
+    var hashes = (m.params.hash || '').split(',');
+    var pending = hashes.length;
+    hashes.forEach(function (hash) {
+        chunks[hash] = [];
+        wiki.get(hash, function (err, rec) {
+            if (err) return show(err);
+            key = rec.key;
+            duration = rec.duration || '1 week';
+            titleName = key;
+            deps = rec.dependencies || [];
+            tags = (rec.tags || []).filter(not('task'));;
+        });
+        onerror(wiki.createReadStream(hash), show, error)
+            .pipe(through(write, end))
+        ;
+        
+        function write (buf, enc, next) {
+            chunks[hash].push(buf);
+            if (m.partial) show(render());
+            next();
+        }
+        function end () {
+            if (!m.partial && --pending === 0) show(render());
+        }
     });
-    onerror(wiki.createReadStream(m.params.hash), show, error)
-        .pipe(through(write, end))
-    ;
-    
-    function write (buf, enc, next) {
-        chunks.push(buf);
-        if (m.partial) show(render());
-        next();
-    }
-    function end () {
-        if (!m.partial) show(render());
-    }
     
     function render () {
         var input = h('input', {
@@ -76,13 +82,15 @@ function edit (wiki, bus, m, show) {
                     value: duration,
                     placeholder: 'duration'
                 }),
-                h('textarea',
-                    {
-                        name: 'description',
-                        placeholder: 'description'
-                    },
-                    Buffer.concat(chunks).toString()
-                ),
+                h('div', Object.keys(chunks).map(function (key) {
+                    return h('textarea',
+                        {
+                            name: 'description',
+                            placeholder: 'description'
+                        },
+                        Buffer.concat(chunks[key]).toString()
+                    );
+                })),
                 h('h3', 'dependencies'),
                 h('textarea',
                     {
