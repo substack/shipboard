@@ -9,7 +9,6 @@ module.exports = function (wiki, bus) {
 };
 
 function edit (wiki, bus, m, show) {
-    var chunks = {};
     var key = '', deps = [], tags = [];
     var duration = '';
     
@@ -24,31 +23,29 @@ function edit (wiki, bus, m, show) {
     
     if (m.partial) show(render());
     
-    var hashes = (m.params.hash || '').split(',');
-    var pending = hashes.length;
-    hashes.forEach(function (hash) {
-        chunks[hash] = [];
-        wiki.get(hash, function (err, rec) {
-            if (err) return show(err);
-            key = rec.key;
-            duration = rec.duration || '1 week';
-            titleName = key;
-            deps = rec.dependencies || [];
-            tags = (rec.tags || []).filter(not('task'));;
-        });
-        onerror(wiki.createReadStream(hash), show, error)
-            .pipe(through(write, end))
-        ;
-        
-        function write (buf, enc, next) {
-            chunks[hash].push(buf);
-            if (m.partial) show(render());
-            next();
-        }
-        function end () {
-            if (!m.partial && --pending === 0) show(render());
-        }
+    var hash = m.params.hash;
+    var chunks = [];
+    
+    wiki.get(hash, function (err, rec) {
+        if (err) return show(err);
+        key = rec.key;
+        duration = rec.duration || '1 week';
+        titleName = key;
+        deps = rec.dependencies || [];
+        tags = (rec.tags || []).filter(not('task'));;
     });
+    onerror(wiki.createReadStream(hash), show, error)
+        .pipe(through(write, end))
+    ;
+    
+    function write (buf, enc, next) {
+        chunks[hash].push(buf);
+        if (m.partial) show(render());
+        next();
+    }
+    function end () {
+        if (!m.partial) show(render());
+    }
     
     function render () {
         var input = h('input', {
