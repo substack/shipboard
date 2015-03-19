@@ -28,6 +28,7 @@ var wsock = websocket.createServer({
     server: server,
     path: '/sync'
 }, whandle);
+
 function whandle (stream) {
     stream.pipe(wiki.replicate({ mode: 'sync' })).pipe(stream);
 }

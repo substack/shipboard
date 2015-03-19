@@ -68,10 +68,10 @@ function handle (wiki, m, show) {
             
             var ws = wsock(whref);
             ws.once('connect', function () {
-                log('connected to ' + whref);
+                log('connected');
             });
             ws.once('end', function () {
-                log('disconnected from ' + whref);
+                log('disconnected');
             });
             
             var sync = wiki.replicate({ mode: mode });

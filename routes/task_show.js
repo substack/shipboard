@@ -8,8 +8,8 @@ var error = require('../lib/error.js');
 module.exports = function (wiki) {
     return function (m, show) {
         if (m.partial) show(h('div', 'loading...'));
-        var chunks = [], hash = '';
-        var body = h('div');
+        var chunks = {};
+        var body = {};
         
         wiki.heads(m.params.name, function (err, heads) {
             if (err) return show(error(err))
@@ -17,34 +17,44 @@ module.exports = function (wiki) {
                 return show(error('404 task not found', 404));
             }
             
-            hash = heads[0].hash; // for now...
-            if (m.partial) show(render(body, hash));
-            onerror(wiki.createReadStream(hash), show, error)
-                .pipe(through(write, end))
-            ;
-        });
-        function write (buf, enc, next) {
-            chunks.push(buf);
-            if (m.partial) showChunks(next);
-            else next();
-        }
-        function end () {
-            if (!m.partial) showChunks();
-        }
-        
-        function showChunks (next) {
-            var mstr = marked(Buffer.concat(chunks).toString());
-            vhtml('<div>' + mstr + '</div>\n', function (err, dom) {
-                if (err) return show(error(err));
-                body = dom;
-                show(render(body, hash));
-                if (next) next();
+            heads.forEach(function (h) {
+                onerror(wiki.createReadStream(h.hash), show, error)
+                    .pipe(save(h.hash))
+                ;
             });
+            var hashes = heads.sort().map(function (h) { return h.hash });
+            if (m.partial) show(render(body));
+        });
+        
+        function save (hash) {
+            chunks[hash] = [];
+            return through(write, end);
+            function write (buf, enc, next) {
+                chunks[hash].push(buf);
+                if (m.partial) showChunks(next);
+                else next();
+            }
+            function end () {
+                if (!m.partial) showChunks();
+            }
+            function showChunks (next) {
+                var mstr = marked(Buffer.concat(chunks[hash]).toString());
+                vhtml('<div>' + mstr + '</div>\n', function (err, dom) {
+                    if (err) return show(error(err));
+                    body[hash] = dom;
+                    show(render(body));
+                    if (next) next();
+                });
+            }
         }
     }
     
-    function render (body, hash) {
-        var href = '/task/' + encodeURIComponent(hash) + '/edit';
+    function render (body) {
+        var hashes = Object.keys(body);
+        var href = '/task/'
+            + encodeURIComponent(hashes.join(','))
+            + '/edit'
+        ;
         return h('div', [
             h('h2', 'task'),
             h('div.right.buttons', [
@@ -52,7 +62,9 @@ module.exports = function (wiki) {
                     h('button', 'edit')
                 ])
             ]),
-            body
+            Object.keys(body).map(function (key) {
+                return h('div', [ body[key], h('hr') ]);
+            })
         ]);
     }
 };

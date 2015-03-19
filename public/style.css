@@ -122,6 +122,7 @@ button:hover {
 
 #sync button {
   margin-right: 30px;
+  margin-bottom: 0.5em;
 }
 
 #sync input[name="url"] {
