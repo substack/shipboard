@@ -145,3 +145,9 @@ button:hover {
 #show-task .bottom-buttons button {
   margin-left: 5px;
 }
+
+#show-task button.all,
+#show-task button.none {
+  width: 50px;
+  background-color: #d080f0;
+}

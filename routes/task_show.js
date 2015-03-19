@@ -6,6 +6,7 @@ var onerror = require('../lib/onerror.js');
 var error = require('../lib/error.js');
 
 module.exports = function (wiki) {
+    var checked = {};
     return function (m, show) {
         if (m.partial) show(h('div', 'loading...'));
         var chunks = {};
@@ -36,6 +37,8 @@ module.exports = function (wiki) {
         
         function save (hash) {
             chunks[hash] = [];
+            if (checked[hash] === undefined) checked[hash] = true;
+            
             return through(write, end);
             function write (buf, enc, next) {
                 chunks[hash].push(buf);
@@ -61,41 +64,58 @@ module.exports = function (wiki) {
                 });
             }
         }
-    }
-    
-    function render (body) {
-        var hashes = Object.keys(body);
-        var merge = h('div.bottom-buttons', [
-            h('div.merge-buttons.right', [
-                h('button', 'merge'),
-                h('button', 'select all')
-            ])
-        ]);
         
-        return h('div#show-task', [
-            h('h2', 'task'),
-            hashes.map(function (hash) {
-                var href = '/task/'
-                    + encodeURIComponent(hash)
-                    + '/edit'
-                ;
-                return h('div.task', [
-                    h('div.right.buttons', [
-                        h('a', { href: href }, [
-                            h('button', 'edit')
+        function render (body) {
+            var hashes = Object.keys(body);
+            var merge = h('div.bottom-buttons', [
+                h('div.merge-buttons.right', [
+                    h('button', 'merge'),
+                    h('button.all', { onclick: all }, 'all'),
+                    h('button.none', { onclick: none }, 'none')
+                ])
+            ]);
+            
+            return h('div#show-task', [
+                h('h2', 'task'),
+                hashes.map(function (hash) {
+                    var href = '/task/'
+                        + encodeURIComponent(hash)
+                        + '/edit'
+                    ;
+                    return h('div.task', [
+                        h('div.right.buttons', [
+                            h('a', { href: href }, [
+                                h('button', 'edit')
+                            ]),
+                            hashes.length > 1
+                                ? h('input', {
+                                    type: 'checkbox',
+                                    checked: checked[hash]
+                                })
+                                : ''
                         ]),
-                        hashes.length > 1
-                            ? h('input', { type: 'checkbox' })
-                            : ''
-                    ]),
-                    h('div.hash', h('a', {
-                        href: '/task/' + hash
-                    }, hash.slice(0,20))),
-                    body[hash],
-                    hashes.length > 1 ? h('hr') : ''
-                ]);
-            }),
-            hashes.length > 1 ? merge : ''
-        ]);
+                        h('div.hash', h('a', {
+                            href: '/task/' + hash
+                        }, hash.slice(0,20))),
+                        body[hash],
+                        hashes.length > 1 ? h('hr') : ''
+                    ]);
+                }),
+                hashes.length > 1 ? merge : ''
+            ]);
+            
+            function all () {
+                Object.keys(checked).forEach(function (h) {
+                    checked[h] = true;
+                });
+                show(render(body));
+            }
+            function none () {
+                Object.keys(checked).forEach(function (h) {
+                    checked[h] = false;
+                });
+                show(render(body));
+            }
+        }
     }
 };
