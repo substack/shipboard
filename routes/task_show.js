@@ -39,19 +39,25 @@ module.exports = function (wiki) {
             return through(write, end);
             function write (buf, enc, next) {
                 chunks[hash].push(buf);
-                if (m.partial) showChunks(next);
+                if (m.partial) saveChunks(function () {
+                    show(render(body));
+                    next();
+                });
                 else next();
             }
             function end () {
-                if (!m.partial && --pending === 0) showChunks();
+                if (!m.partial) {
+                    saveChunks(function () {
+                        if (--pending === 0) show(render(body));
+                    });
+                }
             }
-            function showChunks (next) {
+            function saveChunks (next) {
                 var mstr = marked(Buffer.concat(chunks[hash]).toString());
                 vhtml('<div>' + mstr + '</div>\n', function (err, dom) {
                     if (err) return show(error(err));
                     body[hash] = dom;
-                    show(render(body));
-                    if (next) next();
+                    next();
                 });
             }
         }
@@ -59,9 +65,15 @@ module.exports = function (wiki) {
     
     function render (body) {
         var hashes = Object.keys(body);
+        var merge = h('div', [
+            h('div.merge-buttons.right', [
+                h('button', 'merge')
+            ])
+        ]);
+        
         return h('div#show-task', [
             h('h2', 'task'),
-            Object.keys(body).map(function (hash) {
+            hashes.map(function (hash) {
                 var href = '/task/'
                     + encodeURIComponent(hash)
                     + '/edit'
@@ -70,15 +82,19 @@ module.exports = function (wiki) {
                     h('div.right.buttons', [
                         h('a', { href: href }, [
                             h('button', 'edit')
-                        ])
+                        ]),
+                        hashes.length > 1
+                            ? h('input', { type: 'checkbox' })
+                            : ''
                     ]),
                     h('div.hash', h('a', {
                         href: '/task/' + hash
-                    }, hash)),
+                    }, hash.slice(0,20))),
                     body[hash],
-                    h('hr')
+                    hashes.length > 1 ? h('hr') : ''
                 ]);
-            })
+            }),
+            hashes.length > 1 ? merge : ''
         ]);
     }
 };

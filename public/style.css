@@ -135,4 +135,5 @@ button:hover {
 #show-task .task .hash {
   font-size: 0.8em;
   color: #a080c0;
+  word-wrap: break-word;
 }
