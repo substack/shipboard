@@ -4,14 +4,15 @@ var uniq = require('uniq');
 var onerror = require('../lib/onerror.js');
 var error = require('../lib/error.js');
 
+var merge = require('../lib/merge.js');
+
 module.exports = function (wiki, bus) {
     return function (m, show) { return edit(wiki, bus, m, show) };
 };
 
 function edit (wiki, bus, m, show) {
-    var chunks = {};
-    var key = '', deps = [], tags = [];
-    var duration = '';
+    var meta = {};
+    var desc = '';
     
     var titleName = '';
     var editingTitle = false;
@@ -25,29 +26,17 @@ function edit (wiki, bus, m, show) {
     if (m.partial) show(render());
     
     var hashes = (m.params.hash || '').split(',');
-    var pending = hashes.length;
-    hashes.forEach(function (hash) {
-        chunks[hash] = [];
-        wiki.get(hash, function (err, rec) {
-            if (err) return show(err);
-            key = rec.key;
-            duration = rec.duration || '1 week';
-            titleName = key;
-            deps = rec.dependencies || [];
-            tags = (rec.tags || []).filter(not('task'));;
-        });
-        onerror(wiki.createReadStream(hash), show, error)
-            .pipe(through(write, end))
-        ;
-        
-        function write (buf, enc, next) {
-            chunks[hash].push(buf);
-            if (m.partial) show(render());
-            next();
-        }
-        function end () {
-            if (!m.partial && --pending === 0) show(render());
-        }
+    merge(wiki, hashes, function (err, meta_, text) {
+        meta = meta_;
+        desc = text.map(function (c) {
+            if (typeof c === 'string') return c;
+            if (typeof c === 'object' && c['?']) {
+                return '(((' + c['?'].map(function (x) {
+                    return x.join('')
+                }).join('|||') + ')))';
+            }
+        }).join('');
+        show(render());
     });
     
     function render () {
@@ -72,32 +61,22 @@ function edit (wiki, bus, m, show) {
                 ]),
                 title,
                 h('input', {
-                    type: 'hidden',
-                    name: 'prevName',
-                    value: key,
-                }),
-                h('input', {
                     type: 'text',
                     name: 'duration',
-                    value: duration,
+                    value: meta.duration || '',
                     placeholder: 'duration'
                 }),
-                h('div', Object.keys(chunks).map(function (key) {
-                    return h('textarea',
-                        {
-                            name: 'description',
-                            placeholder: 'description'
-                        },
-                        Buffer.concat(chunks[key]).toString()
-                    );
-                })),
+                h('div', h('textarea', {
+                    name: 'description',
+                    placeholder: 'description'
+                }, desc)),
                 h('h3', 'dependencies'),
                 h('textarea',
                     {
                         name: 'dependencies', 
                         placeholder: 'dependencies (one per line)'
                     },
-                    deps.join('\n')
+                    (meta.dependencies || []).join('\n')
                 ),
                 h('h3', 'tags'),
                 h('textarea',
@@ -105,7 +84,7 @@ function edit (wiki, bus, m, show) {
                         name: 'tags', 
                         placeholder: 'tags (one per line)'
                     },
-                    tags.join('\n')
+                    (meta.tags || []).filter(not('task')).join('\n')
                 ),
                 h('button', { type: 'submit' }, 'submit')
             ])
@@ -114,7 +93,7 @@ function edit (wiki, bus, m, show) {
     
     function onsubmit (ev) {
         ev.preventDefault();
-        key = this.elements.name.value;
+        key = meta.key;
         var deps = this.elements.dependencies.value.split(/\n/)
             .map(function (line) { return line.trim() })
             .filter(function (x) { return /\S/.test(x) })
@@ -124,14 +103,14 @@ function edit (wiki, bus, m, show) {
             .filter(function (x) { return /\S/.test(x) })
         ;
         var opts = {
-            key: key,
+            key: meta.key,
             duration: this.elements.duration.value,
             dependencies: deps,
             prev: hashes,
             tags: uniq([ 'task' ].concat(tags))
         };
         var w = wiki.createWriteStream(opts, function () {
-            bus.emit('go', '/task/' + encodeURIComponent(key));
+            bus.emit('go', '/task/' + encodeURIComponent(meta.key));
         });
         w.end(this.elements.description.value);
     }
