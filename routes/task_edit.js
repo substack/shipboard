@@ -11,6 +11,8 @@ module.exports = function (wiki, bus) {
 function edit (wiki, bus, m, show) {
     var key = '', deps = [], tags = [];
     var duration = '';
+    var hash = m.params.hash;
+    var chunks = [];
     
     var titleName = '';
     var editingTitle = false;
@@ -22,9 +24,6 @@ function edit (wiki, bus, m, show) {
     function hideTitleEdit () { setTitleEdit(false) }
     
     if (m.partial) show(render());
-    
-    var hash = m.params.hash;
-    var chunks = [];
     
     wiki.get(hash, function (err, rec) {
         if (err) return show(err);
@@ -39,7 +38,7 @@ function edit (wiki, bus, m, show) {
     ;
     
     function write (buf, enc, next) {
-        chunks[hash].push(buf);
+        chunks.push(buf);
         if (m.partial) show(render());
         next();
     }
@@ -79,15 +78,13 @@ function edit (wiki, bus, m, show) {
                     value: duration,
                     placeholder: 'duration'
                 }),
-                h('div', Object.keys(chunks).map(function (key) {
-                    return h('textarea',
-                        {
-                            name: 'description',
-                            placeholder: 'description'
-                        },
-                        Buffer.concat(chunks[key]).toString()
-                    );
-                })),
+                h('div', h('textarea',
+                    {
+                        name: 'description',
+                        placeholder: 'description'
+                    },
+                    Buffer.concat(chunks).toString()
+                )),
                 h('h3', 'dependencies'),
                 h('textarea',
                     {
