@@ -19,6 +19,7 @@
     "hyperstream": "^1.2.2",
     "level": "^0.18.0",
     "level-browserify": "^0.18.1",
+    "main-loop": "^3.1.0",
     "marked": "^0.3.3",
     "minimist": "^1.1.0",
     "mkdirp": "~0.5.0",

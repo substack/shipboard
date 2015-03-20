@@ -2,7 +2,7 @@
 
 build and plan software projects in tiny pieces
 
-[View the demo.](https://6edf6275cac669e14806fccde0289c54b37a3a8c.htmlb.in)
+[View the demo.](https://a6031fe81b1bbf6844a23139dca4f31efc5564c1.htmlb.in)
 
 # install
 
