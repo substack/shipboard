@@ -1,6 +1,6 @@
 {
   "name": "shipboard",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "assemble a team of hackers to build an application",
   "main": "index.js",
   "bin": {
