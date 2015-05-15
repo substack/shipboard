@@ -17,7 +17,7 @@ module.exports = function home (wiki) {
         function write (row, enc, next) {
             rows.push(row);
             if (m.partial) show(render());
-            if (++count < 10) next();
+            next();
         }
         function end () {
             if (!m.partial) show(render());

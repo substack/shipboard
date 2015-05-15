@@ -16,6 +16,7 @@
     "ecstatic": "^0.5.8",
     "gantt-chart": "^1.0.2",
     "has": "^1.0.0",
+    "hyperboot": "^2.1.1",
     "hyperstream": "^1.2.2",
     "level": "^0.18.0",
     "level-browserify": "^0.18.1",
